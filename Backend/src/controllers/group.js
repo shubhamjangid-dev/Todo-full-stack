@@ -1,4 +1,5 @@
 import { Group } from "../models/groupSchema.js";
+import { User } from "../models/userSchema.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -47,4 +48,70 @@ const HandleGroupRename = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, "Group Renamed Successfully ! ", renamedGroup));
 });
 
-export { HandleGroupCreate, HandleGroupRename };
+const HandleGroupAddMembers = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(403).json(new ApiError(403, "Only admin can add members"));
+  }
+  const { groupId, emails } = req.body;
+
+  if (!emails.length) {
+    return res.status(401).json(new ApiError(401, "please enter emails"));
+  }
+  const groupExist = await Group.findById(groupId);
+
+  if (!groupExist) {
+    return res.status(403).json(new ApiError(403, "group dont exist"));
+  }
+
+  let members = [...groupExist.members];
+
+  groupExist.members = await addMembersId(emails, members);
+  await groupExist.save({ ValidateBeforeSave: false });
+  const updatedGroup = await Group.findById(groupExist._id);
+
+  if (!updatedGroup) {
+    return res.status(403).json(new ApiError(403, "something went wrong while adding members"));
+  }
+
+  return res.status(201).json(new ApiResponse(203, "members added Successfully!", updatedGroup));
+});
+const addMembersId = async (emails, members) => {
+  for (const email of emails) {
+    const user = await User.findOne({ email });
+    if (user) {
+      members.push(user._id);
+    }
+  }
+  return members.filter((member, index, self) => index === self.findIndex(m => member.equals(m)));
+};
+
+const HandleGroupRemoveMember = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(403).json(new ApiError(403, "Only admin can remove members"));
+  }
+  const { remUser, groupId } = req.body;
+  const groupExist = await Group.findById(groupId);
+
+  if (!groupExist) {
+    return res.status(403).json(new ApiError(403, "group dont exist"));
+  }
+
+  const removeUser = await User.findById(remUser);
+
+  if (!removeUser) {
+    return res.status(403).json(new ApiError(403, "user dont exist"));
+  }
+
+  let members = [...groupExist.members];
+  members = members.filter(member => !member.equals(removeUser._id));
+
+  groupExist.members = members;
+  await groupExist.save({ ValidateBeforeSave: false });
+
+  const updatedGroup = await Group.findById(groupExist._id);
+
+  return res.status(201).json(new ApiResponse(203, "members added Successfully!", updatedGroup));
+});
+export { HandleGroupCreate, HandleGroupRename, HandleGroupAddMembers, HandleGroupRemoveMember };
