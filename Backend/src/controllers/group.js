@@ -8,9 +8,6 @@ const HandleGroupCreate = asyncHandler(async (req, res) => {
   const admin = req.user;
   const { groupname } = req.body;
 
-  if (!admin) {
-    return res.status(403).json(new ApiError(403, "user is not authorised to access this route"));
-  }
   if (!groupname) {
     return res.status(403).json(new ApiError(403, "group name required"));
   }
@@ -32,9 +29,6 @@ const HandleGroupRename = asyncHandler(async (req, res) => {
   const admin = req.user;
   const { groupname, groupId } = req.body;
 
-  if (!admin) {
-    return res.status(403).json(new ApiError(403, "user is not authorised to access this route"));
-  }
   if (!groupname) {
     return res.status(403).json(new ApiError(403, "group name required"));
   }
@@ -49,10 +43,8 @@ const HandleGroupRename = asyncHandler(async (req, res) => {
 });
 
 const HandleGroupAddMembers = asyncHandler(async (req, res) => {
-  const user = req.user;
-  if (!user) {
-    return res.status(403).json(new ApiError(403, "Only admin can add members"));
-  }
+  const admin = req.user;
+
   const { groupId, emails } = req.body;
 
   if (!emails.length) {
@@ -88,9 +80,7 @@ const addMembersId = async (emails, members) => {
 
 const HandleGroupRemoveMember = asyncHandler(async (req, res) => {
   const user = req.user;
-  if (!user) {
-    return res.status(403).json(new ApiError(403, "Only admin can remove members"));
-  }
+  //TODO: ya to khud ko remove kre ya vo admin ho
   const { remUser, groupId } = req.body;
   const groupExist = await Group.findById(groupId);
 
@@ -114,4 +104,25 @@ const HandleGroupRemoveMember = asyncHandler(async (req, res) => {
 
   return res.status(201).json(new ApiResponse(203, "members added Successfully!", updatedGroup));
 });
-export { HandleGroupCreate, HandleGroupRename, HandleGroupAddMembers, HandleGroupRemoveMember };
+
+const SubHandleGroupAddProject = async (groupId, project) => {
+  const groupExist = await Group.findById(groupId);
+  if (!groupExist) {
+    return res.status(403).json(new ApiError(403, "group dont exist"));
+  }
+  groupExist.projectArray.push(project._id);
+  await groupExist.save({ ValidateBeforeSave: false });
+};
+
+const SubHandleGroupRemoveProject = async (groupId, project) => {
+  const groupExist = await Group.findById(groupId);
+  if (!groupExist) {
+    return res.status(403).json(new ApiError(403, "group dont exist"));
+  }
+  let allProjects = [...groupExist.projectArray];
+  allProjects = allProjects.filter(item => !item.equals(project._id));
+  groupExist.projectArray = allProjects;
+  await groupExist.save({ ValidateBeforeSave: false });
+};
+
+export { HandleGroupCreate, HandleGroupRename, HandleGroupAddMembers, HandleGroupRemoveMember, SubHandleGroupAddProject, SubHandleGroupRemoveProject };

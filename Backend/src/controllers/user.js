@@ -79,10 +79,6 @@ const HandleUserLogin = asyncHandler(async (req, res) => {
 const HandleUserLogout = asyncHandler(async (req, res) => {
   const user = req.user; // middleware ne add kiya h cookie ko verify kr ke
 
-  if (!user) {
-    return res.status(403).json(new ApiError(403, "user is not authorised to access this route"));
-  }
-
   user.refreshToken = undefined;
   await user.save({ validateBeforeSave: false }); // validate before save ka mtlb h mongoose schema me ko validate nahi krega ki ye required h ki nahi etc
   const cookieOption = {
@@ -93,9 +89,6 @@ const HandleUserLogout = asyncHandler(async (req, res) => {
 
 const getUser = asyncHandler(async (req, res) => {
   const user = req.user;
-  if (!user) {
-    return res.status(403).json(new ApiError(403, "user is not authorised to access this route"));
-  }
 
   return res.status(201).json(new ApiResponse(201, "User Fetched Successfully", user));
 });

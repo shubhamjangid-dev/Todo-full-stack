@@ -32,7 +32,6 @@ export const verifyTokens = asyncHandler(async (req, res, next) => {
     // return res.status(203).json(new ApiError(403, error.message));
     console.log(error);
 
-    req.user = null;
-    next();
+    return res.status(401).json(new ApiError(401, "You are not authorised", error));
   }
 });

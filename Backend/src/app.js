@@ -23,6 +23,9 @@ app.use("/api/v1/users", userRouter);
 import groupRouter from "./routes/group.routes.js";
 app.use("/api/v1/groups", groupRouter);
 
+// project
+import projectRouter from "./routes/project.routes.js";
+app.use("/api/v1/projects", projectRouter);
 // more
 
 // health check
