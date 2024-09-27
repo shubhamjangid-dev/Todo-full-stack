@@ -2,10 +2,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
-import Login from "./components/comp/Login.jsx";
-import Register from "./components/comp/Register.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Home from "./pages/Home.jsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import Home from "./components/comp/Home.jsx";
+import GroupBoard from "./PageComponents/GroupBoard.jsx";
+import ProjectBoard from "./PageComponents/ProjectBoard.jsx";
+import AddTodo from "./PageComponents/Todo/AddTodo.jsx";
+import Logo from "./Pages/Logo.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -14,6 +18,16 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+        children: [
+          {
+            path: "/team/:groupId",
+            element: <GroupBoard />,
+          },
+          {
+            path: "/project/:projectId",
+            element: <ProjectBoard />,
+          },
+        ],
       },
       {
         path: "/login",
@@ -22,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "/signup",
         element: <Register />,
+      },
+      {
+        path: "/logo",
+        element: <Logo />,
       },
     ],
   },

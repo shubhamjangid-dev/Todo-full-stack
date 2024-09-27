@@ -7,6 +7,9 @@ const projectSchema = new Schema(
       required: true,
     },
     todoArray: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Todo" }],
+    },
+    color: {
       type: String,
     },
   },

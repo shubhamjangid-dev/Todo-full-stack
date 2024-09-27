@@ -17,7 +17,7 @@ const todoSchema = new Schema({
     type: String,
   },
   asignedTo: {
-    type: String,
+    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
 });
 

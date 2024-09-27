@@ -8,6 +8,13 @@ const groupSchema = new Schema(
     admin: { type: Schema.Types.ObjectId, ref: "User" },
     members: [{ type: Schema.Types.ObjectId, ref: "User" }],
     projectArray: [{ type: Schema.Types.ObjectId, ref: "Project" }],
+    invitelink: {
+      type: String,
+    },
+    acceptInviteThroughLink: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
